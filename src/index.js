@@ -14,4 +14,15 @@ client.on('ready', (c) => {
     console.log(`${c.user.username} is online`);
 });
 
+client.on('interactionCreate', (interaction) => {
+    if (!interaction.isChatInputCommand()) return;
+
+    if (interaction.commandName === 'vamanos') {
+        interaction.reply('ALEEEEEEEEEEEEEEEEEEE!');
+    }
+    if (interaction.commandName === 'who-is-ready-to-fly') {
+        interaction.reply(`I AM ${interaction.member.nickname}`);
+    }
+});
+
 client.login(process.env.TOKEN);
