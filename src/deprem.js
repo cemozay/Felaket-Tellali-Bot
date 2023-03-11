@@ -11,6 +11,7 @@ client.on('ready', () => {
   console.log(`Logged in as ${client.user.tag}!`);
 
   // Belirli aralıklarla API'ye istek gönderin
+  //
   setInterval(() => {
     const apiUrl = 'http://api.example.com/deprem';// Tek burayı değişmemiz gerek
     const minMagnitude = 5.0;
