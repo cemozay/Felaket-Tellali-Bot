@@ -26,18 +26,34 @@ client.on('interactionCreate', (interaction) => {
     }
 
     if (interaction.commandName === 'deprem') {
-        interaction.reply(`${interaction.member.nickname} istekte bulundu.`);
+        /* interaction.reply(`${interaction.member.nickname} istekte bulundu.`); */
+        getLatestEarthquake().then(lastData => {
+            ( async () => {
+                const lastData = await getLatestEarthquake();
+                console.log(lastData);
+            })();
+            interaction.reply(`Son deprem şurada oldu: ${lastData.title}, derinlik: ${lastData.depth}, şiddet: ${lastData.mag}, tarih: ${lastData.date}`);
+        });
     }
 });
 
-// Make a GET request to the API endpoint
-fetch('https://api.orhanaydogdu.com.tr/deprem/kandilli/live')
-    // Parse the response as JSON
-    .then(response => response.json())
-    // Log the parsed data to the console
-    .then(data => console.log(data))
-    // Log any errors to the console
-    .catch(error => console.error(error));
+//Get Latest Earthquake Data Function
+async function getLatestEarthquake() {
+    try {
+        const response = await fetch('https://api.orhanaydogdu.com.tr/deprem/kandilli/live');
+        const data = await response.json();
 
+        //Last Ten Earthquake Data log
+        const lastTenData = data.result.slice(0,10)
+
+        //Last Earthquake Data
+        const lastData = data.result[0];
+        return lastData;
+        
+    } catch (error) {
+        //Log any errors to the console
+        console.error(error);
+    }
+}
 
 client.login(process.env.TOKEN);
