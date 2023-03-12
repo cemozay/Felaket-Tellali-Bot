@@ -17,8 +17,30 @@ client.on('ready', (c) => {
     console.log(`${c.user.username} is online`);
 });
 
-//Bot responses to slash commands
+
+
+
 client.on('interactionCreate', (interaction) => {
+    if (!interaction.isChatInputCommand()) return;
+  
+    if (interaction.commandName === 'hi') {
+      interaction.reply(`Merhaba!`);
+    }
+  
+    if (interaction.commandName === 'deprem') {
+      getLatestEarthquake().then(lastData => {
+        const embed = new MessageEmbed()
+          .setColor('#ff0000')
+          .setTitle('Son Deprem')
+          .setDescription(`${lastData.title}\nDerinlik: ${lastData.depth}\nŞiddet: ${lastData.mag}\nTarih: ${lastData.date}`)
+          .setTimestamp();
+        interaction.reply({ embeds: [embed] });
+      });
+    }
+  });
+
+//Bot responses to slash commands
+/*client.on('interactionCreate', (interaction) => {
     if (!interaction.isChatInputCommand()) return;
 
     if (interaction.commandName === 'hi') {
@@ -26,7 +48,7 @@ client.on('interactionCreate', (interaction) => {
     }
 
     if (interaction.commandName === 'deprem') {
-        /* interaction.reply(`${interaction.member.nickname} istekte bulundu.`); */
+        /* interaction.reply(`${interaction.member.nickname} istekte bulundu.`); 
         getLatestEarthquake().then(lastData => {
             ( async () => {
                 const lastData = await getLatestEarthquake();
@@ -36,7 +58,7 @@ client.on('interactionCreate', (interaction) => {
         });
     }
 });
-
+*/
 //Get Latest Earthquake Data Function
 async function getLatestEarthquake() {
     try {
