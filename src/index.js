@@ -13,6 +13,13 @@ const client = new Client({
 });
 
 //Is bot alive?
+client.on('ready', (c) => {
+    console.log(`${c.user.username} is online`);
+});
+
+
+
+
 client.on('interactionCreate', (interaction) => {
     if (!interaction.isChatInputCommand()) return;
   
@@ -31,8 +38,27 @@ client.on('interactionCreate', (interaction) => {
       });
     }
   });
-  
 
+//Bot responses to slash commands
+/*client.on('interactionCreate', (interaction) => {
+    if (!interaction.isChatInputCommand()) return;
+
+    if (interaction.commandName === 'hi') {
+        interaction.reply(`Merhaba!`);
+    }
+
+    if (interaction.commandName === 'deprem') {
+        /* interaction.reply(`${interaction.member.nickname} istekte bulundu.`); 
+        getLatestEarthquake().then(lastData => {
+            ( async () => {
+                const lastData = await getLatestEarthquake();
+                console.log(lastData);
+            })();
+            interaction.reply(`Son deprem şurada oldu: ${lastData.title}, derinlik: ${lastData.depth}, şiddet: ${lastData.mag}, tarih: ${lastData.date}`);
+        });
+    }
+});
+*/
 //Get Latest Earthquake Data Function
 async function getLatestEarthquake() {
     try {
