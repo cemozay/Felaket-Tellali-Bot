@@ -1,6 +1,6 @@
 //Get required packages discord and dotenv
 require('dotenv').config();
-const { Client, IntentsBitField} = require('discord.js');
+const { Client, IntentsBitField, EmbedBuilder} = require('discord.js');
 
 //Set Client intents
 const client = new Client({
@@ -17,9 +17,7 @@ client.on('ready', (c) => {
     console.log(`${c.user.username} is online`);
 });
 
-
-
-
+//Bot responses to slash commands
 client.on('interactionCreate', (interaction) => {
     if (!interaction.isChatInputCommand()) return;
   
@@ -28,44 +26,27 @@ client.on('interactionCreate', (interaction) => {
     }
   
     if (interaction.commandName === 'deprem') {
-      getLatestEarthquake().then(lastData => {
-        const embed = new MessageEmbed()
-          .setColor('#ff0000')
-          .setTitle('Son Deprem')
-          .setDescription(`${lastData.title}\nDerinlik: ${lastData.depth}\nŞiddet: ${lastData.mag}\nTarih: ${lastData.date}`)
-          .setTimestamp();
-        interaction.reply({ embeds: [embed] });
-      });
+        ( async () => {
+            await checkForNewEarthquake();
+            interaction.reply({ embeds: [earthquakeEmbed] });
+            setInterval(() => {
+              checkForNewEarthquake().then((dataChanged) => {
+                if (dataChanged) {
+                  interaction.channel.send({ embeds: [earthquakeEmbed] });
+                }
+              });
+            }, 10000);
+        })();
     }
   });
 
-//Bot responses to slash commands
-/*client.on('interactionCreate', (interaction) => {
-    if (!interaction.isChatInputCommand()) return;
-
-    if (interaction.commandName === 'hi') {
-        interaction.reply(`Merhaba!`);
-    }
-
-    if (interaction.commandName === 'deprem') {
-        /* interaction.reply(`${interaction.member.nickname} istekte bulundu.`); 
-        getLatestEarthquake().then(lastData => {
-            ( async () => {
-                const lastData = await getLatestEarthquake();
-                console.log(lastData);
-            })();
-            interaction.reply(`Son deprem şurada oldu: ${lastData.title}, derinlik: ${lastData.depth}, şiddet: ${lastData.mag}, tarih: ${lastData.date}`);
-        });
-    }
-});
-*/
 //Get Latest Earthquake Data Function
 async function getLatestEarthquake() {
     try {
         const response = await fetch('https://api.orhanaydogdu.com.tr/deprem/kandilli/live');
         const data = await response.json();
 
-        //Last Ten Earthquake Data log
+        //Last Ten Earthquake Data
         const lastTenData = data.result.slice(0,10)
 
         //Last Earthquake Data
@@ -77,5 +58,25 @@ async function getLatestEarthquake() {
         console.error(error);
     }
 }
+
+let lastEarthquakeData; // last fetched earthquake data
+let earthquakeEmbed; // earthquakeEmbed for new earthquake function
+
+// Function to fetch earthquake data and send a message if the ID has changed
+async function checkForNewEarthquake() {
+  const latestData = await getLatestEarthquake();
+  if (latestData.earthquake_id !== lastEarthquakeData?.earthquake_id) { // if the latest data ID is different from the previous data's ID
+    console.log(latestData);
+    earthquakeEmbed = new EmbedBuilder()
+      .setColor('#ff0000')
+      .setTitle('Son Deprem')
+      .setDescription(`${latestData.title}\nŞiddet: ${latestData.mag}\nDerinlik: ${latestData.depth}\nTarih: ${latestData.date}`)
+      .setTimestamp();
+    lastEarthquakeData = latestData; // update the lastEarthquakeData variable
+    return true;
+  }
+  return false;
+}
+
 
 client.login(process.env.TOKEN);
