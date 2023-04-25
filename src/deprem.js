@@ -1,18 +1,22 @@
-const { Client, Intents } = require('discord.js');
+const { Client, Intents} = require('discord.js');
 const axios = require('axios');
 
 const client = new Client({
-  intents: [Intents.FLAGS.GUILDS]
+intents: [Intents.FLAGS.GUILDS]
 });
 
 let channelID;
+let isEnabled = true; //API çağrıları etkindir
 
 client.on('ready', () => {
   console.log(`Logged in as ${client.user.tag}!`);
 
   // Belirli aralıklarla API'ye istek gönderin
   setInterval(() => {
-    const apiUrl = 'http://api.example.com/deprem';// Tek burayı değişmemiz gerek
+    // isEnabled değişkenine bağlı olarak API'ye istek yap veya yapma
+    if (!isEnabled) return;
+
+    const apiUrl = 'http://api.example.com/deprem';
     const minMagnitude = 5.0;
 
     axios.get(apiUrl)
@@ -32,24 +36,35 @@ client.on('ready', () => {
   }, 300000); // 5 dakika (300 saniye) aralıklarla istek gönderin
 });
 
-client.on('interaction', async (interaction) => {
-  if (!interaction.isCommand()) return;
-
+client.on('interaction', async(interaction) =>{
+  if(!interaction.isCommand()) return;
+  
   const command = interaction.commandName;
 
-  if (command === 'kanalsec') {
+  if(command == 'kanalsec')
+  {
     const channel = interaction.options.getChannel('kanal');
 
-    if (!channel) {
+    if(!channel)
+    {
       interaction.reply('Lütfen bir kanal etiketleyin!');
       return;
     }
 
-    // Kanalın ID'sini kaydedin
     channelID = channel.id;
 
     interaction.reply(`Kanal başarıyla seçildi: ${channel}`);
   }
-});
 
+  if(command === 'depremaktif')
+  {
+    isEnabled = true;
+    interaction.reply('Deprem bildirimi etkinleştirildi.');
+  }
+  if(command === 'deprempasif')
+  {
+    isEnabled = false;
+    interaction.reply('Deprem bildirimi devre dışı bırakıldı.');
+  }
+});
 client.login('token');
